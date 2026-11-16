@@ -120,7 +120,7 @@
         });
         cards.forEach(function (card) {
           card.hidden = i !== 0 && card.dataset.category !== name;
-          if (!card.hidden) card.classList.add("is-visible");
+          if (!card.hidden) { card.style.transitionDelay = ""; card.classList.add("is-visible"); }
         });
       });
       filters.appendChild(chip);
@@ -228,23 +228,89 @@
   });
 
   /* ---------- Шапка и появление блоков ---------- */
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var nav = $("#nav");
-  var onScroll = function () { nav.classList.toggle("is-scrolled", window.scrollY > 8); };
-  window.addEventListener("scroll", onScroll, { passive: true });
+  var hero = $("#hero");
+  var heroContent = $(".hero__content");
+  var ticking = false;
+
+  function onScroll() {
+    ticking = false;
+    var y = window.scrollY;
+    var h = hero.offsetHeight;
+    nav.classList.toggle("is-dark", y < h - 48);
+    nav.classList.toggle("is-scrolled", y > 8);
+    // Первый экран плавно уходит вглубь при прокрутке
+    if (!reduceMotion && y <= h) {
+      var p = y / h;
+      heroContent.style.transform = "translate3d(0," + (y * 0.25).toFixed(1) + "px,0) scale(" + (1 - p * 0.08).toFixed(4) + ")";
+      heroContent.style.opacity = Math.max(0, 1 - p * 1.5).toFixed(3);
+    }
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+  }, { passive: true });
+  window.addEventListener("resize", onScroll);
   onScroll();
 
+  /* Появление блоков — соседние элементы выходят по очереди */
   var revealEls = document.querySelectorAll(".reveal");
-  if ("IntersectionObserver" in window) {
+  if ("IntersectionObserver" in window && !reduceMotion) {
     var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        }
+      // Сначала считаем задержки для всей пачки, потом показываем
+      var batch = entries.filter(function (e) { return e.isIntersecting; }).map(function (e) { return e.target; });
+      batch.forEach(function (node, i) {
+        observer.unobserve(node);
+        var delay = Math.min(i, 5) * 90;
+        node.style.transitionDelay = delay + "ms";
+        node.classList.add("is-visible");
+        setTimeout(function () { node.style.transitionDelay = ""; }, delay + 1000);
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
     revealEls.forEach(function (n) { observer.observe(n); });
   } else {
     revealEls.forEach(function (n) { n.classList.add("is-visible"); });
+  }
+
+  /* Счётчик проектов */
+  var counter = $("#counter");
+  if (counter && "IntersectionObserver" in window && !reduceMotion) {
+    var target = parseInt(counter.dataset.to, 10) || 0;
+    counter.textContent = "0";
+    var counterObserver = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      counterObserver.disconnect();
+      var start = null;
+      var duration = 1800;
+      (function tick(now) {
+        if (start === null) start = now;
+        var t = Math.min((now - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - t, 3);
+        counter.textContent = Math.round(target * eased);
+        if (t < 1) requestAnimationFrame(tick);
+      })(performance.now());
+    }, { threshold: 0.4 });
+    counterObserver.observe(counter);
+  }
+
+  /* Наклон карточек и подсветка за курсором (только мышь) */
+  if (!reduceMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    document.querySelectorAll(".card, .tile").forEach(function (node) {
+      var isCard = node.classList.contains("card");
+      var surface = isCard ? node.querySelector(".card__media") : node;
+      node.addEventListener("pointermove", function (e) {
+        var r = surface.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width;
+        var y = (e.clientY - r.top) / r.height;
+        surface.style.setProperty("--mx", (x * 100).toFixed(1) + "%");
+        surface.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+        if (isCard) {
+          surface.style.transform = "perspective(900px) rotateX(" + ((0.5 - y) * 6).toFixed(2) + "deg) rotateY(" + ((x - 0.5) * 6).toFixed(2) + "deg)";
+        }
+      });
+      node.addEventListener("pointerleave", function () {
+        if (isCard) surface.style.transform = "";
+      });
+    });
   }
 })();
