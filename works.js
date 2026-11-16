@@ -7,7 +7,7 @@ const SITE = {
   name: "AI not AI",                      // имя / бренд в шапке
   whatsapp: "https://wa.me/77761985879",  // WhatsApp: +7 776 198 58 79
   telegram: "",                           // например "https://t.me/username" ("" — скрыть)
-  email: "",                              // например "hello@example.com" ("" — скрыть)
+  email: "krysamanleo@gmail.com",         // почта ("" — скрыть)
   instagram: ""                           // например "https://instagram.com/username"
 };
 

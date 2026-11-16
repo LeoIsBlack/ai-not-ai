@@ -227,6 +227,45 @@
     contacts.appendChild(a);
   });
 
+  /* ---------- Подвал: контакты и документы ---------- */
+  var footerContacts = $("#footer-contacts");
+  [
+    ["WhatsApp: +7 776 198 58 79", site.whatsapp],
+    ["Telegram", site.telegram],
+    ["Instagram", site.instagram],
+    [site.email, site.email ? "mailto:" + site.email : ""]
+  ].forEach(function (l) {
+    if (!l[1]) return;
+    var li = el("li");
+    var a = el("a", "", l[0]);
+    a.href = l[1];
+    if (l[1].indexOf("mailto:") !== 0) { a.target = "_blank"; a.rel = "noopener"; }
+    li.appendChild(a);
+    footerContacts.appendChild(li);
+  });
+
+  var docModal = $("#doc-modal");
+  var docMail = $("#doc-mail");
+  document.querySelectorAll("[data-doc]").forEach(function (link) {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      var name = link.dataset.doc;
+      $("#doc-title").textContent = name;
+      if (site.email) {
+        docMail.href = "mailto:" + site.email + "?subject=" + encodeURIComponent("Запрос документа: " + name);
+      }
+      if (typeof docModal.showModal === "function") docModal.showModal();
+      else docModal.setAttribute("open", "");
+    });
+  });
+  function closeDoc() {
+    if (typeof docModal.close === "function") docModal.close();
+    else docModal.removeAttribute("open");
+  }
+  $("#doc-close").addEventListener("click", closeDoc);
+  docMail.addEventListener("click", closeDoc);
+  docModal.addEventListener("click", function (e) { if (e.target === docModal) closeDoc(); });
+
   /* ---------- Шапка и появление блоков ---------- */
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var nav = $("#nav");
