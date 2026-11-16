@@ -31,62 +31,52 @@ const SITE = {
 */
 const WORKS = [
   {
-    id: "brand-film",
-    title: "Имиджевый ролик",
-    category: "Реклама",
-    description: "Короткое описание задачи и результата появится здесь.",
-    tools: "",
-    video: "",
-    cover: "",
-    vertical: false
-  },
-  {
-    id: "product",
-    title: "Продуктовая анимация",
-    category: "Реклама",
-    description: "",
-    tools: "",
-    video: "",
-    cover: "",
-    vertical: false
-  },
-  {
-    id: "music-video",
-    title: "Музыкальный клип",
-    category: "Клипы",
-    description: "",
-    tools: "",
-    video: "",
-    cover: "",
-    vertical: false
-  },
-  {
-    id: "reels",
-    title: "Вертикальный ролик для соцсетей",
-    category: "Соцсети",
-    description: "",
-    tools: "",
-    video: "",
-    cover: "",
-    vertical: true
-  },
-  {
-    id: "character",
-    title: "ИИ-персонаж",
-    category: "Персонажи",
-    description: "",
-    tools: "",
-    video: "",
-    cover: "",
-    vertical: false
-  },
-  {
-    id: "short-film",
-    title: "Короткометражка",
+    id: "destruction",
+    title: "Кинематографичная история с разрушениями",
     category: "Кино",
-    description: "",
+    description: "Зрелищные сцены разрушений в стилистике большого кино.",
     tools: "",
-    video: "",
+    video: "https://youtu.be/lgs-ODgba2w",
+    cover: "",
+    vertical: false
+  },
+  {
+    id: "cartoon-stories",
+    title: "Истории в мультяшном стиле",
+    category: "Анимация",
+    description: "Любой сюжет можно рассказать в мультяшной стилистике.",
+    tools: "",
+    video: "https://youtu.be/nBrdrXfeIfQ",
+    cover: "",
+    vertical: false
+  },
+  {
+    id: "viking",
+    title: "История викинга",
+    category: "Кино",
+    description: "Реалистичная история с живыми персонажами и атмосферой эпохи.",
+    tools: "",
+    video: "https://youtu.be/rHWmqz_qsIs",
+    cover: "",
+    vertical: false
+  },
+  {
+    id: "love-story",
+    title: "Love Story",
+    category: "Анимация",
+    description: "История любви в мультяшном стиле.",
+    tools: "",
+    video: "https://youtu.be/l6B8KCyOO-Q",
+    cover: "",
+    vertical: false
+  },
+  {
+    id: "cyclist",
+    title: "Замена человека в кадре",
+    category: "Реализм",
+    description: "Реалистичная замена человека в видео: велосипедист в движении.",
+    tools: "",
+    video: "https://youtu.be/tDsim0TA4vQ",
     cover: "",
     vertical: false
   }

@@ -14,7 +14,15 @@
 
   /* ---------- Имя и год ---------- */
   if (site.name) {
-    document.querySelectorAll("[data-site-name]").forEach(function (n) { n.textContent = site.name; });
+    document.querySelectorAll("[data-site-name]").forEach(function (n) {
+      if (!n.classList.contains("logo")) { n.textContent = site.name; return; }
+      // Логотип: слово «not» набирается тоньше и тише остальных
+      n.textContent = "";
+      site.name.split(/\s+/).forEach(function (word) {
+        n.appendChild(el("span", word.toLowerCase() === "not" ? "logo__not" : "", word));
+      });
+      n.setAttribute("aria-label", site.name + " — наверх");
+    });
     document.title = site.name + " — портфолио ИИ-видео";
   }
   $("#year").textContent = new Date().getFullYear();
@@ -24,11 +32,7 @@
     if (!url) return null;
     var m;
     if ((m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/))) {
-      return {
-        type: "iframe",
-        src: "https://www.youtube-nocookie.com/embed/" + m[1] + "?autoplay=1&rel=0&playsinline=1",
-        cover: "https://i.ytimg.com/vi/" + m[1] + "/hqdefault.jpg"
-      };
+      return { type: "youtube", id: m[1], cover: "https://i.ytimg.com/vi/" + m[1] + "/maxresdefault.jpg" };
     }
     if ((m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/))) {
       return { type: "iframe", src: "https://player.vimeo.com/video/" + m[1] + "?autoplay=1" };
@@ -48,6 +52,267 @@
     return { type: "link", src: url };
   }
 
+  /* Обложка YouTube: большая, а если её нет — запасная без чёрных полос */
+  function ytCover(img, id) {
+    img.addEventListener("load", function check() {
+      if (img.naturalWidth > 0 && img.naturalWidth <= 120) {
+        img.removeEventListener("load", check);
+        img.src = "https://i.ytimg.com/vi/" + id + "/mqdefault.jpg";
+      }
+    });
+    img.src = "https://i.ytimg.com/vi/" + id + "/maxresdefault.jpg";
+  }
+
+  /* ---------- Собственный плеер для YouTube ----------
+     Ролик играет внутри сайта: название, логотип и ссылки YouTube
+     остаются за краями рамки, а все нажатия принимает наш слой. */
+  var ytQueue = [];
+  var ytLoading = false;
+  function loadYT(ok, fail) {
+    if (window.YT && window.YT.Player) { ok(); return; }
+    ytQueue.push([ok, fail]);
+    if (ytLoading) return;
+    ytLoading = true;
+    window.onYouTubeIframeAPIReady = function () {
+      ytQueue.splice(0).forEach(function (q) { q[0](); });
+    };
+    var script = document.createElement("script");
+    script.src = "https://www.youtube.com/iframe_api";
+    script.onerror = function () {
+      ytLoading = false;
+      ytQueue.splice(0).forEach(function (q) { q[1](); });
+    };
+    document.head.appendChild(script);
+  }
+
+  var ICONS = {
+    play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6v12M15.5 6v12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+    sound: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    muted: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    full: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 9.5v-5h5M14.5 4.5h5v5M19.5 14.5v5h-5M9.5 19.5h-5v-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
+  function fmtTime(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  function mountYouTube(host, id, work) {
+    var alive = true;
+    var player = null;
+    var timer = null;
+    var idleTimer = null;
+    var seeking = false;
+    var started = false;
+    var pendingPlay = false;
+
+    var root = el("div", "player is-cover is-loading");
+    var frame = el("div", "player__frame");
+    var target = el("div");
+    frame.appendChild(target);
+
+    var poster = el("img", "player__poster");
+    poster.alt = "";
+    if (work.cover) poster.src = work.cover; else ytCover(poster, id);
+
+    var surface = el("button", "player__surface");
+    surface.type = "button";
+    surface.setAttribute("aria-label", "Воспроизвести или поставить на паузу");
+
+    var big = el("span", "player__big");
+    big.innerHTML = ICONS.play;
+    var spinner = el("span", "player__spinner");
+
+    var bar = el("div", "player__bar");
+    var btnPlay = el("button", "player__btn");
+    btnPlay.type = "button";
+    btnPlay.setAttribute("aria-label", "Воспроизвести");
+    btnPlay.innerHTML = ICONS.play;
+    var timeCur = el("span", "player__time", "0:00");
+    var range = el("input", "player__range");
+    range.type = "range"; range.min = 0; range.max = 1000; range.step = 1; range.value = 0;
+    range.setAttribute("aria-label", "Перемотка");
+    var timeDur = el("span", "player__time", "0:00");
+    var btnMute = el("button", "player__btn");
+    btnMute.type = "button";
+    btnMute.setAttribute("aria-label", "Выключить звук");
+    btnMute.innerHTML = ICONS.sound;
+    var btnFull = el("button", "player__btn");
+    btnFull.type = "button";
+    btnFull.setAttribute("aria-label", "На весь экран");
+    btnFull.innerHTML = ICONS.full;
+
+    [btnPlay, timeCur, range, timeDur, btnMute].forEach(function (n) { bar.appendChild(n); });
+    var canFull = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+    if (canFull) bar.appendChild(btnFull);
+
+    [frame, poster, surface, big, spinner, bar].forEach(function (n) { root.appendChild(n); });
+    host.appendChild(root);
+
+    function state() {
+      try { return player && player.getPlayerState ? player.getPlayerState() : -1; } catch (e) { return -1; }
+    }
+    function isPlaying() { var s = state(); return s === 1 || s === 3; }
+
+    function wake() {
+      root.classList.add("is-active");
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function () { root.classList.remove("is-active"); }, 2600);
+    }
+
+    function setRange(v) {
+      range.value = v;
+      range.style.setProperty("--p", (v / 10) + "%");
+    }
+
+    function syncMute() {
+      var m = false;
+      try { m = player.isMuted(); } catch (e) {}
+      btnMute.innerHTML = m ? ICONS.muted : ICONS.sound;
+      btnMute.setAttribute("aria-label", m ? "Включить звук" : "Выключить звук");
+    }
+
+    function showEnd() {
+      try { player.pauseVideo(); player.seekTo(0, true); } catch (e) {}
+      root.classList.add("is-cover");
+      root.classList.remove("is-playing", "is-loading");
+      setRange(0);
+      timeCur.textContent = "0:00";
+    }
+
+    function tick() {
+      if (!player || !player.getDuration) return;
+      var dur = 0, cur = 0;
+      try { dur = player.getDuration() || 0; cur = player.getCurrentTime() || 0; } catch (e) { return; }
+      timeDur.textContent = fmtTime(dur);
+      if (!seeking) {
+        timeCur.textContent = fmtTime(cur);
+        setRange(dur ? Math.round(cur / dur * 1000) : 0);
+      }
+      // Останавливаемся чуть раньше конца, чтобы YouTube не показал свои рекомендации
+      if (dur > 1 && cur >= dur - 0.4 && state() === 1) showEnd();
+    }
+
+    function toggle() {
+      if (!player || !player.playVideo) return;
+      wake();
+      if (isPlaying()) { player.pauseVideo(); return; }
+      pendingPlay = true;
+      player.playVideo();
+      // Если устройство не дало запустить ролик из нашего слоя —
+      // на время пропускаем нажатие к самому плееру
+      setTimeout(function () {
+        if (!alive || !pendingPlay || isPlaying()) return;
+        root.classList.add("is-native");
+        root.classList.remove("is-cover", "is-loading");
+      }, 2200);
+    }
+
+    surface.addEventListener("click", toggle);
+    btnPlay.addEventListener("click", toggle);
+    btnMute.addEventListener("click", function () {
+      if (!player || !player.isMuted) return;
+      if (player.isMuted()) player.unMute(); else player.mute();
+      setTimeout(syncMute, 150);
+      wake();
+    });
+    btnFull.addEventListener("click", function () {
+      var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+      if (fsEl) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      else (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+    });
+    surface.addEventListener("dblclick", function () { if (canFull) btnFull.click(); });
+    range.addEventListener("input", function () {
+      seeking = true;
+      range.style.setProperty("--p", (range.value / 10) + "%");
+      try { timeCur.textContent = fmtTime(player.getDuration() * range.value / 1000); } catch (e) {}
+      wake();
+    });
+    range.addEventListener("change", function () {
+      try { player.seekTo(player.getDuration() * range.value / 1000, true); } catch (e) {}
+      seeking = false;
+    });
+    root.addEventListener("pointermove", wake);
+    root.addEventListener("keydown", wake);
+    bar.addEventListener("focusin", wake);
+    root.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+    function plainFallback() {
+      if (!alive) return;
+      // Скрипт плеера не загрузился — показываем обычное встраивание
+      var f = document.createElement("iframe");
+      f.src = "https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&rel=0&playsinline=1";
+      f.title = work.title || "Видео";
+      f.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
+      f.allowFullscreen = true;
+      host.textContent = "";
+      host.appendChild(f);
+    }
+
+    loadYT(function () {
+      if (!alive) return;
+      player = new YT.Player(target, {
+        host: "https://www.youtube-nocookie.com",
+        videoId: id,
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          autoplay: 1, controls: 0, rel: 0, playsinline: 1, disablekb: 1,
+          fs: 0, iv_load_policy: 3, modestbranding: 1, cc_load_policy: 0
+        },
+        events: {
+          onReady: function () {
+            if (!alive) return;
+            var f = player.getIframe && player.getIframe();
+            if (f) { f.title = work.title || "Видео"; f.tabIndex = -1; }
+            player.playVideo();
+            timer = setInterval(tick, 250);
+            // Браузер запретил запуск со звуком — начинаем без звука
+            setTimeout(function () {
+              if (!alive || isPlaying()) return;
+              try { player.mute(); player.playVideo(); } catch (e) {}
+              setTimeout(syncMute, 200);
+              setTimeout(function () {
+                if (alive && !started) root.classList.remove("is-loading");
+              }, 1500);
+            }, 1500);
+          },
+          onStateChange: function (e) {
+            if (!alive) return;
+            if (e.data === 1) {
+              started = true;
+              pendingPlay = false;
+              root.classList.add("is-playing");
+              root.classList.remove("is-cover", "is-loading", "is-native");
+              btnPlay.innerHTML = ICONS.pause;
+              btnPlay.setAttribute("aria-label", "Пауза");
+              syncMute();
+              wake();
+            } else if (e.data === 2 || e.data === 0) {
+              root.classList.remove("is-playing");
+              btnPlay.innerHTML = ICONS.play;
+              btnPlay.setAttribute("aria-label", "Воспроизвести");
+              if (e.data === 0) showEnd();
+            }
+          },
+          onError: function () { if (alive) root.classList.remove("is-loading"); }
+        }
+      });
+    }, plainFallback);
+
+    setTimeout(function () { try { surface.focus({ preventScroll: true }); } catch (e) {} }, 50);
+
+    return function teardown() {
+      alive = false;
+      clearInterval(timer);
+      clearTimeout(idleTimer);
+      try { if (player && player.destroy) player.destroy(); } catch (e) {}
+    };
+  }
+
   /* ---------- Карточки ---------- */
   var grid = $("#grid");
   var cards = [];
@@ -62,9 +327,10 @@
     var cover = work.cover || (video && video.cover);
     if (cover) {
       var img = el("img", "card__cover");
-      img.src = cover;
       img.alt = "";
       img.loading = "lazy";
+      if (video && video.type === "youtube" && !work.cover) ytCover(img, video.id);
+      else img.src = cover;
       media.appendChild(img);
     } else if (video && video.type === "video") {
       // Обложки нет — показываем первый кадр самого ролика
@@ -132,6 +398,7 @@
   var modalMedia = $("#modal-media");
   var copyBtn = $("#modal-copy");
   var currentWork = null;
+  var teardownPlayer = null;
 
   function workUrl(work) {
     return location.href.split("#")[0] + "#" + work.id;
@@ -152,7 +419,9 @@
 
     modalMedia.textContent = "";
     var player;
-    if (video.type === "video") {
+    if (video.type === "youtube") {
+      teardownPlayer = mountYouTube(modalMedia, video.id, work);
+    } else if (video.type === "video") {
       player = document.createElement("video");
       player.src = video.src;
       player.controls = true;
@@ -166,7 +435,7 @@
       player.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
       player.allowFullscreen = true;
     }
-    modalMedia.appendChild(player);
+    if (player) modalMedia.appendChild(player);
 
     if (typeof modal.showModal === "function") modal.showModal();
     else modal.setAttribute("open", "");
@@ -179,6 +448,7 @@
   }
 
   function onClosed() {
+    if (teardownPlayer) { teardownPlayer(); teardownPlayer = null; }
     modalMedia.textContent = ""; // останавливает воспроизведение
     currentWork = null;
     history.replaceState(null, "", location.pathname + location.search);
