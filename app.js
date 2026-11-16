@@ -226,7 +226,13 @@
       }, 2200);
     }
 
-    surface.addEventListener("click", toggle);
+    // На телефоне первое касание только показывает панель, пауза — со второго
+    var lastTouch = false;
+    surface.addEventListener("pointerdown", function (e) { lastTouch = e.pointerType !== "mouse"; });
+    surface.addEventListener("click", function () {
+      if (lastTouch && isPlaying() && !root.classList.contains("is-active")) { wake(); return; }
+      toggle();
+    });
     btnPlay.addEventListener("click", toggle);
     btnMute.addEventListener("click", function () {
       if (!player || !player.isMuted) return;
@@ -239,7 +245,7 @@
       if (fsEl) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
       else (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
     });
-    surface.addEventListener("dblclick", function () { if (canFull) btnFull.click(); });
+    surface.addEventListener("dblclick", function () { if (canFull && !lastTouch) btnFull.click(); });
     range.addEventListener("input", function () {
       seeking = true;
       range.style.setProperty("--p", (range.value / 10) + "%");
@@ -250,7 +256,7 @@
       try { player.seekTo(player.getDuration() * range.value / 1000, true); } catch (e) {}
       seeking = false;
     });
-    root.addEventListener("pointermove", wake);
+    root.addEventListener("pointermove", function (e) { if (e.pointerType === "mouse") wake(); });
     root.addEventListener("keydown", wake);
     bar.addEventListener("focusin", wake);
     root.addEventListener("contextmenu", function (e) { e.preventDefault(); });
