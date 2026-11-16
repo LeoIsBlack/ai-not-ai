@@ -81,12 +81,22 @@ const WORKS = [
     vertical: false
   },
   {
-    id: "ads",
-    title: "Рекламные ролики для брендов",
+    id: "ad",
+    title: "Рекламный ролик",
     category: "Рекламные ролики",
-    description: "",
+    description: "Рекламный ролик, полностью созданный с помощью ИИ.",
     tools: "",
-    video: "",
+    video: "https://youtu.be/N_dNM-yc8Fk",
+    cover: "",
+    vertical: false
+  },
+  {
+    id: "site-promo",
+    title: "Реклама сайта AI not AI",
+    category: "Рекламные ролики",
+    description: "Промо-ролик этого сайта, сделанный с помощью ИИ.",
+    tools: "",
+    video: "https://youtu.be/0VlSqm5Awgw",
     cover: "",
     vertical: false
   }
