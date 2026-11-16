@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AI not AI — портфолио ИИ-видео</title>
+  <meta name="description" content="Портфолио работ, созданных с помощью искусственного интеллекта: реклама, клипы, персонажи, ролики для соцсетей.">
+  <meta property="og:title" content="AI not AI — портфолио ИИ-видео">
+  <meta property="og:description" content="Реклама, клипы и ролики, созданные с помощью искусственного интеллекта.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="#top" data-site-name>AI not AI</a>
+      <nav class="nav__links" aria-label="Основная навигация">
+        <a href="#works">Работы</a>
+        <a href="#services" class="nav__hide-mobile">Услуги</a>
+        <a href="#process" class="nav__hide-mobile">Процесс</a>
+        <a href="#contact">Контакты</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- Первый экран -->
+    <section class="hero">
+      <p class="eyebrow reveal">Портфолио</p>
+      <h1 class="hero__title reveal">Видео,&nbsp;созданное ИИ.<br><span class="muted">Выглядит как&nbsp;кино.</span></h1>
+      <p class="hero__lead reveal">Рекламные ролики, клипы и&nbsp;персонажи, сделанные с&nbsp;помощью нейросетей&nbsp;— быстро, красиво и&nbsp;без&nbsp;съёмочной площадки.</p>
+      <div class="hero__actions reveal">
+        <a class="btn btn--primary" href="#works">Смотреть работы</a>
+        <a class="link-arrow" href="#contact">Обсудить проект</a>
+      </div>
+    </section>
+
+    <!-- Работы -->
+    <section class="section" id="works">
+      <div class="container">
+        <h2 class="section__title reveal">Работы.</h2>
+        <p class="section__lead reveal">Избранные проекты. Нажмите на&nbsp;карточку, чтобы посмотреть ролик.</p>
+        <div class="filters reveal" id="filters" role="group" aria-label="Фильтр по категориям"></div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </section>
+
+    <!-- Услуги -->
+    <section class="section section--alt" id="services">
+      <div class="container">
+        <h2 class="section__title reveal">Что я делаю.</h2>
+        <div class="tiles">
+          <article class="tile reveal">
+            <h3>Реклама</h3>
+            <p>Имиджевые и&nbsp;продуктовые ролики для&nbsp;брендов, маркетплейсов и&nbsp;запусков.</p>
+          </article>
+          <article class="tile reveal">
+            <h3>Клипы и&nbsp;кино</h3>
+            <p>Музыкальные видео, тизеры и&nbsp;короткий метр с&nbsp;цельной визуальной историей.</p>
+          </article>
+          <article class="tile reveal">
+            <h3>Соцсети</h3>
+            <p>Вертикальные ролики для&nbsp;Reels, Shorts и&nbsp;TikTok, которые досматривают до&nbsp;конца.</p>
+          </article>
+          <article class="tile reveal">
+            <h3>Персонажи</h3>
+            <p>ИИ-аватары и&nbsp;герои бренда с&nbsp;узнаваемой внешностью от&nbsp;кадра к&nbsp;кадру.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Процесс -->
+    <section class="section" id="process">
+      <div class="container">
+        <h2 class="section__title reveal">Как проходит работа.</h2>
+        <ol class="steps">
+          <li class="step reveal">
+            <span class="step__num">01</span>
+            <h3>Идея</h3>
+            <p>Обсуждаем задачу, референсы и&nbsp;сроки. Фиксируем, каким должен быть результат.</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">02</span>
+            <h3>Сценарий и&nbsp;стиль</h3>
+            <p>Готовлю раскадровку и&nbsp;первые кадры, чтобы согласовать визуал до&nbsp;начала производства.</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">03</span>
+            <h3>Производство</h3>
+            <p>Генерация, монтаж, звук и&nbsp;цвет. Показываю промежуточную версию и&nbsp;вношу правки.</p>
+          </li>
+          <li class="step reveal">
+            <span class="step__num">04</span>
+            <h3>Готовый ролик</h3>
+            <p>Отдаю финальные файлы в&nbsp;нужных форматах&nbsp;— для&nbsp;сайта, рекламы и&nbsp;соцсетей.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Контакты -->
+    <section class="section section--dark" id="contact">
+      <div class="container contact">
+        <h2 class="contact__title reveal">Есть задача?<br><span class="muted">Давайте сделаем.</span></h2>
+        <p class="contact__lead reveal">Напишите пару слов о&nbsp;проекте&nbsp;— отвечу в&nbsp;течение дня.</p>
+        <div class="contact__actions reveal" id="contacts"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <span>© <span id="year"></span> <span data-site-name>AI not AI</span></span>
+      <a href="#top">Наверх</a>
+    </div>
+  </footer>
+
+  <!-- Окно просмотра -->
+  <dialog class="modal" id="modal" aria-labelledby="modal-title">
+    <button class="modal__close" id="modal-close" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="modal__body">
+      <div class="modal__media" id="modal-media"></div>
+      <div class="modal__info">
+        <div class="modal__text">
+          <p class="modal__category" id="modal-category"></p>
+          <h3 class="modal__title" id="modal-title"></h3>
+          <p class="modal__desc" id="modal-desc"></p>
+          <p class="modal__tools" id="modal-tools"></p>
+        </div>
+        <button class="btn btn--ghost" id="modal-copy" type="button">Скопировать ссылку</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="works.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
