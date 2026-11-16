@@ -214,8 +214,8 @@
   /* ---------- Контакты ---------- */
   var contacts = $("#contacts");
   var links = [
-    ["Написать в Telegram", site.telegram],
-    ["WhatsApp", site.whatsapp],
+    ["Написать в WhatsApp", site.whatsapp],
+    ["Telegram", site.telegram],
     ["Instagram", site.instagram],
     [site.email, site.email ? "mailto:" + site.email : ""]
   ].filter(function (l) { return l[1]; });

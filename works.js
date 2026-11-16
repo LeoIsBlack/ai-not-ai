@@ -5,9 +5,9 @@
 /* --- Контакты и имя --- */
 const SITE = {
   name: "AI not AI",                      // имя / бренд в шапке
-  telegram: "https://t.me/username",      // ссылка на Telegram (оставь "" чтобы скрыть)
-  email: "hello@example.com",             // почта (оставь "" чтобы скрыть)
-  whatsapp: "",                           // например "https://wa.me/79990000000"
+  whatsapp: "https://wa.me/77761985879",  // WhatsApp: +7 776 198 58 79
+  telegram: "",                           // например "https://t.me/username" ("" — скрыть)
+  email: "",                              // например "hello@example.com" ("" — скрыть)
   instagram: ""                           // например "https://instagram.com/username"
 };
 
