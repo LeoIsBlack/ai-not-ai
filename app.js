@@ -17,7 +17,9 @@
     document.querySelectorAll("[data-site-name]").forEach(function (n) {
       if (!n.classList.contains("logo")) { n.textContent = site.name; return; }
       // Логотип: слово «not» набирается тоньше и тише остальных
+      var mark = n.querySelector(".logo__mark");
       n.textContent = "";
+      if (mark) n.appendChild(mark); // знак остаётся, меняется только название
       site.name.split(/\s+/).forEach(function (word) {
         n.appendChild(el("span", word.toLowerCase() === "not" ? "logo__not" : "", word));
       });

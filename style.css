@@ -163,6 +163,13 @@ img, video, iframe { display: block; max-width: 100%; }
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
+.logo__mark {
+  flex: none;
+  align-self: center;
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 0.12em;
+}
 .logo__not {
   font-weight: 400;
   letter-spacing: -0.01em;
