@@ -37,7 +37,7 @@ const WORKS = [
     description: "Зрелищные сцены разрушений в стилистике большого кино.",
     tools: "",
     video: "https://youtu.be/lgs-ODgba2w",
-    cover: "",
+    cover: "covers/destruction.jpg",
     vertical: false
   },
   {
@@ -47,7 +47,7 @@ const WORKS = [
     description: "Любой сюжет можно рассказать в мультяшной стилистике.",
     tools: "",
     video: "https://youtu.be/nBrdrXfeIfQ",
-    cover: "",
+    cover: "covers/cartoon-stories.jpg",
     vertical: false
   },
   {
@@ -76,8 +76,8 @@ const WORKS = [
     category: "Реализм",
     description: "Реалистичная замена человека в видео: велосипедист в движении.",
     tools: "",
-    video: "https://youtu.be/tDsim0TA4vQ",
-    cover: "",
+    video: "videos/cyclist.mp4",
+    cover: "covers/cyclist.jpg",
     vertical: false
   },
   {
@@ -87,16 +87,6 @@ const WORKS = [
     description: "Рекламный ролик, полностью созданный с помощью ИИ.",
     tools: "",
     video: "https://youtu.be/N_dNM-yc8Fk",
-    cover: "",
-    vertical: false
-  },
-  {
-    id: "site-promo",
-    title: "Реклама сайта AI not AI",
-    category: "Рекламные ролики",
-    description: "Промо-ролик этого сайта, сделанный с помощью ИИ.",
-    tools: "",
-    video: "https://youtu.be/0VlSqm5Awgw",
     cover: "",
     vertical: false
   }

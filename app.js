@@ -125,6 +125,10 @@
     var big = el("span", "player__big");
     big.innerHTML = ICONS.play;
     var spinner = el("span", "player__spinner");
+    // Подсказка на случай, когда устройство разрешило запуск только без звука
+    var unmuteBtn = el("button", "player__unmute");
+    unmuteBtn.type = "button";
+    unmuteBtn.innerHTML = ICONS.muted + "<span>Включить звук</span>";
 
     var bar = el("div", "player__bar");
     var btnPlay = el("button", "player__btn");
@@ -149,7 +153,7 @@
     var canFull = !!(root.requestFullscreen || root.webkitRequestFullscreen);
     if (canFull) bar.appendChild(btnFull);
 
-    [frame, poster, surface, big, spinner, bar].forEach(function (n) { root.appendChild(n); });
+    [frame, poster, surface, big, spinner, unmuteBtn, bar].forEach(function (n) { root.appendChild(n); });
     host.appendChild(root);
 
     // YouTube выбирает качество по размеру окна плеера. Рисуем его увеличенным
@@ -237,8 +241,17 @@
     btnMute.addEventListener("click", function () {
       if (!player || !player.isMuted) return;
       if (player.isMuted()) player.unMute(); else player.mute();
+      root.classList.remove("is-automuted");
       setTimeout(syncMute, 150);
       wake();
+    });
+    unmuteBtn.addEventListener("click", function () {
+      if (!player || !player.unMute) return;
+      player.unMute();
+      root.classList.remove("is-automuted");
+      setTimeout(syncMute, 150);
+      // Некоторые браузеры при включении звука ставят ролик на паузу — запускаем снова
+      setTimeout(function () { if (alive && !isPlaying()) { try { player.playVideo(); } catch (e) {} } }, 500);
     });
     btnFull.addEventListener("click", function () {
       var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
@@ -295,6 +308,7 @@
             setTimeout(function () {
               if (!alive || isPlaying()) return;
               try { player.mute(); player.playVideo(); } catch (e) {}
+              root.classList.add("is-automuted");
               setTimeout(syncMute, 200);
               setTimeout(function () {
                 if (alive && !started) root.classList.remove("is-loading");
@@ -319,7 +333,15 @@
               if (e.data === 0) showEnd();
             }
           },
-          onError: function () { if (alive) root.classList.remove("is-loading"); }
+          onError: function () {
+            if (!alive) return;
+            // YouTube отказался показывать ролик на сайте — сообщаем об этом зрителю
+            root.classList.remove("is-loading", "is-playing");
+            root.classList.add("is-cover", "is-error");
+            if (!root.querySelector(".player__error")) {
+              root.appendChild(el("p", "player__error", "Ролик временно недоступен"));
+            }
+          }
         }
       });
     }, plainFallback);
@@ -389,6 +411,14 @@
     cards.push(card);
   });
 
+  // Плеер YouTube подгружаем заранее: тогда ролик стартует сразу по нажатию
+  // и браузер чаще разрешает запуск со звуком
+  if (works.some(function (w) { var v = parseVideo(w.video); return v && v.type === "youtube"; })) {
+    var preloadYT = function () { setTimeout(function () { loadYT(function () {}, function () {}); }, 1500); };
+    if (document.readyState === "complete") preloadYT();
+    else window.addEventListener("load", preloadYT);
+  }
+
   /* ---------- Фильтры ---------- */
   var categories = [];
   works.forEach(function (w) {
@@ -440,6 +470,10 @@
     copyBtn.textContent = "Скопировать ссылку";
 
     modalMedia.textContent = "";
+    // Окно открываем до создания плеера: в скрытом окне ролик не запускается
+    if (typeof modal.showModal === "function") modal.showModal();
+    else modal.setAttribute("open", "");
+
     var player;
     if (video.type === "youtube") {
       teardownPlayer = mountYouTube(modalMedia, video.id, work);
@@ -458,9 +492,6 @@
       player.allowFullscreen = true;
     }
     if (player) modalMedia.appendChild(player);
-
-    if (typeof modal.showModal === "function") modal.showModal();
-    else modal.setAttribute("open", "");
     if (work.id) history.replaceState(null, "", "#" + work.id);
   }
 
