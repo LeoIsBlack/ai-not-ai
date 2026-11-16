@@ -153,10 +153,10 @@
     host.appendChild(root);
 
     // YouTube выбирает качество по размеру окна плеера. Рисуем его увеличенным
-    // (не уже ~2200px) и сжимаем обратно — так ролик идёт в 1080p, а не в 480p.
+    // (не уже ~1040px) и сжимаем обратно — так ролик идёт в 480p и быстро грузится.
     function fit() {
       var w = root.clientWidth || 1;
-      root.style.setProperty("--k", Math.min(6, Math.max(1, 2200 / w)).toFixed(3));
+      root.style.setProperty("--k", Math.min(6, Math.max(1, 1040 / w)).toFixed(3));
     }
     fit();
     var resizeWatch = null;
