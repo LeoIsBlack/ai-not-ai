@@ -11,7 +11,8 @@
   --accent-hover: #0077ed;
   --nav-bg: rgba(255, 255, 255, 0.72);
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.1);
-  --radius: 22px;
+  --radius: 30px;
+  --radius-xl: 48px;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --grad: linear-gradient(90deg, #64d2ff 0%, #bf5af2 50%, #ff6482 100%);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -93,6 +94,8 @@ img, video, iframe { display: block; max-width: 100%; }
   transform: translateY(28px);
   transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
 }
+/* Элемент, ушедший вверх за экран, возвращается движением сверху вниз */
+.js .reveal.from-top { transform: translateY(-28px); }
 .js .reveal.is-visible { opacity: 1; transform: none; }
 
 /* Появление первого экрана при загрузке */
@@ -224,6 +227,7 @@ img, video, iframe { display: block; max-width: 100%; }
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   background: #000;
   color: #f5f5f7;
   min-height: 100vh;
@@ -404,7 +408,7 @@ img, video, iframe { display: block; max-width: 100%; }
 
 /* ---------- Секции ---------- */
 .section { padding: clamp(72px, 11vw, 140px) 0; }
-.section--alt { background: var(--bg-alt); }
+.section--alt { background: var(--bg-alt); border-radius: var(--radius-xl); }
 .section--dark { background: #000; color: #f5f5f7; }
 
 .section__title {
@@ -596,6 +600,9 @@ img, video, iframe { display: block; max-width: 100%; }
   color: #f5f5f7;
   text-align: center;
   padding: clamp(72px, 12vw, 150px) 0;
+  width: min(1240px, calc(100% - 32px));
+  margin: 0 auto clamp(40px, 6vw, 80px);
+  border-radius: var(--radius-xl);
 }
 .stat__inner { position: relative; z-index: 2; }
 .stat__num {
@@ -654,7 +661,7 @@ img, video, iframe { display: block; max-width: 100%; }
   width: 48px;
   height: 48px;
   margin-bottom: 22px;
-  border-radius: 14px;
+  border-radius: 16px;
   color: #fff;
 }
 .tile__icon svg {
@@ -720,7 +727,12 @@ img, video, iframe { display: block; max-width: 100%; }
 .step p { margin-top: 8px; font-size: 15px; color: var(--secondary); }
 
 /* ---------- Контакты ---------- */
-.contact-section { position: relative; isolation: isolate; overflow: hidden; }
+.contact-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
 .contact { position: relative; z-index: 2; text-align: center; }
 
 .contact__title {
@@ -868,7 +880,7 @@ img, video, iframe { display: block; max-width: 100%; }
 
 /* ---------- Телефоны ---------- */
 @media (max-width: 640px) {
-  :root { --radius: 18px; }
+  :root { --radius: 24px; --radius-xl: 32px; }
 
   .nav__links { gap: 20px; }
   .nav__hide-mobile { display: none; }
@@ -912,7 +924,7 @@ img, video, iframe { display: block; max-width: 100%; }
   /* Отклик на нажатие — на телефоне нет наведения */
   .card:active .card__media { transform: scale(0.975); }
 
-  .stat { padding: 72px 0; }
+  .stat { padding: 72px 0; width: calc(100% - 20px); }
   .stat__num { font-size: clamp(96px, 34vw, 200px); }
 
   .tiles { grid-template-columns: 1fr; gap: 14px; }

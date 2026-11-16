@@ -257,16 +257,29 @@
   var revealEls = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window && !reduceMotion) {
     var observer = new IntersectionObserver(function (entries) {
-      // Сначала считаем задержки для всей пачки, потом показываем
-      var batch = entries.filter(function (e) { return e.isIntersecting; }).map(function (e) { return e.target; });
-      batch.forEach(function (node, i) {
-        observer.unobserve(node);
+      var entering = [];
+      entries.forEach(function (entry) {
+        var node = entry.target;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.12) {
+          if (!node.classList.contains("is-visible")) entering.push(node);
+        } else if (!entry.isIntersecting) {
+          // Ушёл за экран — прячем, чтобы при возврате анимация сыграла снова.
+          // Если ушёл вверх, вернётся движением сверху вниз.
+          node.style.transitionDelay = "";
+          node.classList.remove("is-visible");
+          node.classList.toggle("from-top", entry.boundingClientRect.top < 0);
+        }
+      });
+      // При прокрутке вверх соседние элементы выходят в обратном порядке
+      if (entering.length && entering[0].classList.contains("from-top")) entering.reverse();
+      entering.forEach(function (node, i) {
         var delay = Math.min(i, 5) * 90;
         node.style.transitionDelay = delay + "ms";
         node.classList.add("is-visible");
-        setTimeout(function () { node.style.transitionDelay = ""; }, delay + 1000);
+        clearTimeout(node._revealTimer);
+        node._revealTimer = setTimeout(function () { node.style.transitionDelay = ""; }, delay + 1000);
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    }, { threshold: [0, 0.12], rootMargin: "0px 0px -40px 0px" });
     revealEls.forEach(function (n) { observer.observe(n); });
   } else {
     revealEls.forEach(function (n) { n.classList.add("is-visible"); });
