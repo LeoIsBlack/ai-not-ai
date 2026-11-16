@@ -925,8 +925,10 @@ img, video, iframe { display: block; max-width: 100%; }
   position: absolute;
   left: 0;
   top: -100%;
-  width: 100%;
-  height: 300%;
+  width: calc(100% * var(--k, 1));
+  height: calc(300% * var(--k, 1));
+  transform: scale(calc(1 / var(--k, 1)));
+  transform-origin: 0 0;
   pointer-events: none;
 }
 .player.is-native .player__frame { pointer-events: auto; }

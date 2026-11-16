@@ -152,6 +152,21 @@
     [frame, poster, surface, big, spinner, bar].forEach(function (n) { root.appendChild(n); });
     host.appendChild(root);
 
+    // YouTube выбирает качество по размеру окна плеера. Рисуем его увеличенным
+    // (не уже ~2200px) и сжимаем обратно — так ролик идёт в 1080p, а не в 480p.
+    function fit() {
+      var w = root.clientWidth || 1;
+      root.style.setProperty("--k", Math.min(6, Math.max(1, 2200 / w)).toFixed(3));
+    }
+    fit();
+    var resizeWatch = null;
+    if ("ResizeObserver" in window) {
+      resizeWatch = new ResizeObserver(fit);
+      resizeWatch.observe(root);
+    } else {
+      window.addEventListener("resize", fit);
+    }
+
     function state() {
       try { return player && player.getPlayerState ? player.getPlayerState() : -1; } catch (e) { return -1; }
     }
@@ -254,7 +269,7 @@
 
     loadYT(function () {
       if (!alive) return;
-      player = new YT.Player(target, {
+      player = root._yt = new YT.Player(target, {
         host: "https://www.youtube-nocookie.com",
         videoId: id,
         width: "100%",
@@ -309,6 +324,7 @@
       alive = false;
       clearInterval(timer);
       clearTimeout(idleTimer);
+      if (resizeWatch) resizeWatch.disconnect(); else window.removeEventListener("resize", fit);
       try { if (player && player.destroy) player.destroy(); } catch (e) {}
     };
   }

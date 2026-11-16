@@ -79,5 +79,15 @@ const WORKS = [
     video: "https://youtu.be/tDsim0TA4vQ",
     cover: "",
     vertical: false
+  },
+  {
+    id: "ads",
+    title: "Рекламные ролики для брендов",
+    category: "Рекламные ролики",
+    description: "",
+    tools: "",
+    video: "",
+    cover: "",
+    vertical: false
   }
 ];
