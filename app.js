@@ -537,6 +537,8 @@
   openFromHash();
 
   /* ---------- Контакты ---------- */
+  var leadWa = $(".contact__lead a");
+  if (leadWa && site.whatsapp) leadWa.href = site.whatsapp;
   var contacts = $("#contacts");
   var links = [
     ["Написать в WhatsApp", site.whatsapp],
