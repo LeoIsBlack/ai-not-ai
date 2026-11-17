@@ -596,26 +596,61 @@
   var nav = $("#nav");
   var hero = $("#hero");
   var heroContent = $(".hero__content");
+  var heroHeight = hero.offsetHeight || 1;
+  var targetHeroY = Math.max(0, Math.min(window.scrollY, heroHeight));
+  var smoothHeroY = targetHeroY;
   var ticking = false;
 
-  function onScroll() {
+  function renderHero(y) {
+    if (y <= 0.05) {
+      heroContent.style.transform = "";
+      heroContent.style.opacity = "";
+      return;
+    }
+    var p = Math.max(0, Math.min(1, y / heroHeight));
+    var s = (1 - p * 0.08).toFixed(5);
+    heroContent.style.transform = "translate3d(0," + (y * 0.25).toFixed(2) + "px,0) scale3d(" + s + "," + s + ",1)";
+    heroContent.style.opacity = Math.max(0, 1 - p * 1.5).toFixed(4);
+  }
+
+  function stepScroll() {
     ticking = false;
-    var y = window.scrollY;
-    var h = hero.offsetHeight;
-    nav.classList.toggle("is-dark", y < h - 48);
+    var rawY = window.scrollY || window.pageYOffset || 0;
+    var y = Math.max(0, rawY);
+    nav.classList.toggle("is-dark", y < heroHeight - 48);
     nav.classList.toggle("is-scrolled", y > 8);
-    // Первый экран плавно уходит вглубь при прокрутке
-    if (!reduceMotion && y <= h) {
-      var p = y / h;
-      heroContent.style.transform = "translate3d(0," + (y * 0.25).toFixed(1) + "px,0) scale(" + (1 - p * 0.08).toFixed(4) + ")";
-      heroContent.style.opacity = Math.max(0, 1 - p * 1.5).toFixed(3);
+
+    // Первый экран плавно уходит вглубь при прокрутке (со сглаживанием рывков колеса мыши)
+    if (reduceMotion) return;
+    targetHeroY = Math.min(y, heroHeight);
+    var diff = targetHeroY - smoothHeroY;
+    if (Math.abs(diff) > 0.15) {
+      smoothHeroY += diff * 0.25;
+      renderHero(smoothHeroY);
+      ticking = true;
+      requestAnimationFrame(stepScroll);
+    } else if (smoothHeroY !== targetHeroY) {
+      smoothHeroY = targetHeroY;
+      renderHero(smoothHeroY);
     }
   }
-  window.addEventListener("scroll", function () {
-    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
-  }, { passive: true });
-  window.addEventListener("resize", onScroll);
-  onScroll();
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(stepScroll);
+    }
+  }
+
+  function onResize() {
+    heroHeight = hero.offsetHeight || 1;
+    onScroll();
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onResize);
+  renderHero(smoothHeroY);
+  stepScroll();
 
   /* Появление блоков — соседние элементы выходят по очереди */
   var revealEls = document.querySelectorAll(".reveal");

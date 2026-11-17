@@ -111,7 +111,7 @@ img, video, iframe { display: block; max-width: 100%; }
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(0.4em); filter: blur(10px); }
-  to   { opacity: 1; transform: none; filter: blur(0); }
+  to   { opacity: 1; transform: none; filter: none; }
 }
 
 /* ---------- Шапка ---------- */
@@ -286,6 +286,9 @@ img, video, iframe { display: block; max-width: 100%; }
   flex-direction: column;
   align-items: center;
   will-change: transform, opacity;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .badge {
